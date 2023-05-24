@@ -1,0 +1,125 @@
+.hero-background {
+  background-image: url(assets/backgroundpic.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 94vh;
+
+  background-position: center bottom;
+}
+
+.navbar-logo {
+  width: 50px;
+}
+
+.nav-link {
+  font-weight: 600;
+  color: #253210b9;
+}
+
+.nav-item .active {
+  color: #253210 !important;
+}
+
+.custom-green {
+  color: #253210a4 !important;
+}
+
+.bg-m-green {
+  background: #799d3e !important;
+}
+
+.btn-dash {
+  border-radius: 0.25rem 0.25rem 0rem 0rem !important;
+  background: #b9b9b9 !important;
+  color: #666666 !important;
+}
+
+.rounded-card {
+  border-radius: 40px !important;
+}
+
+.active-dash-btn {
+  color: #5d764e !important;
+  background: white !important;
+}
+
+.text-m-green {
+  color: #657a41 !important;
+}
+
+.white-text{
+  color: #ffffff !important;
+}
+
+.hero-header {
+  font-size: 70px;
+}
+
+.hero-desc {
+
+}
+
+.hero-bg-trans {
+  background: #00000070;
+  min-height: 94vh;
+}
+
+.sign-up-card {
+  min-width: 450px !important;
+  max-width: 450px;
+}
+
+.dash-card {
+  background: white !important;
+  border: none !important;
+  border-radius: 0rem 0.25rem 0.25rem 0.25rem !important;
+  min-height: 350px !important;
+  max-height: 550px !important;
+}
+
+.btn-create {
+  background: #8ab14b !important;
+  height: 40px !important;
+  font-weight: 600 !important;
+  margin-top: -8px;
+  margin-bottom: 10px;
+}
+
+.modal-wrapper {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100vh;
+  background: #00000094;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.booking-modal {
+  width: 500px !important;
+}
+
+.weight-input {
+  width: 70px;
+  height: 38px;
+  text-align: center;
+  outline: none;
+  font-weight: 600;
+  font-size: 25px;
+}
+
+.weight-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.weight-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.weight-input[type=number] {
+  -moz-appearance: textfield;
+}

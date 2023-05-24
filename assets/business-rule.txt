@@ -1,0 +1,15 @@
+1. user/rider can sign in and log in
+2. user can book his/her laundry
+3. user can determine or choose the location of the delivery
+4. user can view the price of their purchased laundry 
+5. user can schedule his/her time of pick up 
+6. user can select the types of laundry items they want to have cleaned
+7. user can cancel their order 
+8. user can provide ratings for the laundry service
+9. user will be informed on what time the washed laundry would arrive
+10. user/customer is updated of the status of their delivery
+11. admin can see their purchase of their laundry 
+12. admin can confirm on purchase cancellation
+13. rider will know or can see where it be delivered
+14. rider can know how much the delivery cost.
+15. admin can modify service prescription and price 
