@@ -107,7 +107,12 @@ $user_info = $_SESSION['user_info'];
                         <div class="col-12">
                             <div class="dash-card w-100 p-4 overflow-auto">
                                 <?php 
-                                    $sql = "SELECT * FROM bookings WHERE user_id=$user->user_id";
+                                    $sql = "SELECT *
+                                    FROM bookings
+                                    JOIN services ON bookings.service_id = services.service_id
+                                    JOIN deliveries ON bookings.booking_id = deliveries.booking_id
+                                    WHERE bookings.user_id = $user->user_id";
+
                                     $result = $conn->query($sql);
 
                                     if ($result->num_rows > 0) {
@@ -118,11 +123,18 @@ $user_info = $_SESSION['user_info'];
                                                 <div>
                                                     <h5><span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span></h5>
                                                     <h5 class="card-title mb-1">
-                                                        Booking No: <strong><?php echo $row['id']; ?></strong>
+                                                        <strong>Booking No:</strong> <?php echo $row['booking_id']; ?>
                                                     </h5>
-                                                    <p class="mb-0 text-secondary">
-                                                        <?php echo $row['created_on']; ?>
+                                                    <p class="mb-0">
+                                                        <strong>Address:</strong> <?php echo $row['address']; ?>
                                                     </p>
+                                                    <small class="mb-0 text-secondary">
+                                                        <strong>Created:</strong> <?php echo $row['created_on']; ?>
+                                                    </small>
+                                                    <br>
+                                                    <small class="mb-0 text-info">
+                                                        <strong class="text-secondary">Notes:</strong> <?php echo ($row['notes'] ? $row['notes'] : 'None'); ?>
+                                                    </small>
                                                 </div>
                                                 <div class="align-self-center text-right">
                                                     <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
@@ -207,7 +219,7 @@ $user_info = $_SESSION['user_info'];
                 </div>
                 <div class="form-group">
                     <label for="service_type">Service Type</label>
-                    <select class="form-control" id="service_type">
+                    <select class="form-control" name="service_type" id="service_type">
                         <option value="1">Wash</option>
                         <option value="2">Wash & Fold</option>
                         <option value="3">Wash, Fold & Iron</option>
@@ -231,7 +243,7 @@ $user_info = $_SESSION['user_info'];
                 <hr>
                 <div class="form-group" id="other_address_form">
                     <label for="exampleFormControlSelect1">Address</label>
-                    <input type="text" class="form-control" name="other_address" id="other_address" placeholder="Enter address">
+                    <input type="text" class="form-control" name="address" id="address" placeholder="Enter address">
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Notes (Optional)</label>
@@ -254,58 +266,59 @@ $user_info = $_SESSION['user_info'];
 
 if(isset($_POST['submit'])) {
 
-    // $baseWashAmount = 70;
-    // $baseWashFoldAmount = 40;
-    // $baseWashFoldIronAmount = 40;
-    // $baseDeliveryPrice = 40;
+    $laundryWeight = $_POST['laundry_weight'];
+    $service_id = $_POST['service_type'];
+    $address = $_POST['address'];
+    $notes = $_POST['notes'];
 
-    // $iron = false;
-    // $fold = false;
+    $baseWashAmount = 70;
+    $baseWashFoldAmount = 110;
+    $baseWashFoldIronAmount = 150;
+    $baseDeliveryPrice = 40;
 
-    // $fulfillment = $_POST['fulfillment'];
-    // $laundryWeight = $_POST['laundry_weight'];
+    global $baseWashAmount, $baseWashFoldAmount, $baseWashFoldIronAmount, $baseDeliveryPrice;
 
-    // $weightMultiplier = ceil($laundryWeight / 7);
-    // $washPrice = $baseWashAmount * $weightMultiplier;
-    // $washFoldPrice = $baseWashFoldAmount * $weightMultiplier;
-    // $washFoldIronPrice = $baseWashFoldIronAmount * $weightMultiplier;
-    // $deliveryPrice = $baseDeliveryPrice * $weightMultiplier;
+    $weightMultiplier = ceil($laundryWeight / 7);
+    $washPrice = $baseWashAmount * $weightMultiplier;
+    $washFoldPrice = $baseWashFoldAmount * $weightMultiplier;
+    $washFoldIronPrice = $baseWashFoldIronAmount * $weightMultiplier;
+    $deliveryPrice = $baseDeliveryPrice * $weightMultiplier;
 
-    // $additionalPrice = 0;
+    $additionalPrice = 0;
 
-    // if ($iron) {
-    //     $additionalPrice += $washPrice;
-    // }
+    if ($_POST['service_type'] == 1) {
+        $additionalPrice += $washPrice;
+    }
 
-    // if ($fold) {
-    //     $additionalPrice += $washFoldPrice;
-    // }
+    if ($_POST['service_type'] == 2) {
+        $additionalPrice += $washFoldPrice;
+    }
 
-    // $fulfillmentPrice = 0;
+    if ($_POST['service_type'] == 3) {
+        $additionalPrice += $washFoldIronPrice;
+    }
 
-    // if ($fulfillment === 'delivery') {
-    //     $fulfillmentPrice = $deliveryPrice;
-    // }
+    $fulfillmentPrice = 0;
 
-    // $totalAmount = $washPrice + $additionalPrice + $fulfillmentPrice;
+    if ($_POST['fulfillment'] === 'delivery') {
+        $fulfillmentPrice = $deliveryPrice;
+    }
 
-    // $customer_id = $user->id;
-    // $weight = $_POST['laundry_weight'];
-    // $price = $totalAmount;
-    // $status = "new";
-    // $otherAddress = $_POST['other_address'];
-    // $notes = $_POST['notes'];
-    // $fulfillment_type = $_POST['fulfillment'];
+    $totalAmount = $additionalPrice + $fulfillmentPrice;
 
-    // $sql = "INSERT INTO booking (customer_id, weight, price, status, other_address, notes, fulfillment_type) VALUES ('$customer_id', '$weight', '$price', '$status', '$otherAddress', '$notes', '$fulfillment_type')";
+    $createBooking = "INSERT INTO bookings (user_id, service_id, weight, address, notes, total_payment) VALUES ('$user->user_id', '$service_id', '$laundryWeight', '$address', '$notes', '$totalAmount')";
 
-    // if ($conn->query($sql) === TRUE) {
-    //     header('Location: dashboard-customer.php');
-    // } else {
-    //     echo "Error: " . $sql . "<br>" . $conn->error;
-    // }
+    if ($conn->query($createBooking) === TRUE) {
+        $createDelivery = "INSERT INTO deliveries (booking_id, status) VALUES ('$conn->insert_id', 'pending')";
+            if ($conn->query($createDelivery) === TRUE) {
+                return true;
+            }
+        // echo 'Success!';
+    } else {
+        echo "Error: " . $createBooking . "<br>" . $conn->error;
+    }
 
-    // $conn->close();
+    $conn->close();
 }
 
 ?>

@@ -9,7 +9,7 @@ if(!isset($_SESSION['loggedin'])) {
 $db_servername = "localhost";
 $db_username = "root";
 $db_password = "";
-$db_name = "laundry_delivery";
+$db_name = "db_laundry_delivery";
 
 $conn = new mysqli($db_servername, $db_username, $db_password, $db_name);
 
@@ -19,14 +19,24 @@ if ($conn->connect_error) {
 
 $username = $_SESSION['username'];
 
-$sql = "SELECT * FROM user WHERE username = '$username'";
+// $sql = "SELECT * FROM users WHERE username = '$username' INNER JOIN bookings ON users.user_id=bookings.user_id";
+$sql = "SELECT * FROM users WHERE username = '$username'";
+$result = $conn->query($sql);
+if ($result->num_rows == 1) {
+    $row = $result->fetch_assoc();
+    $_SESSION['user'] = (object) $row;
+}
+
+$user = $_SESSION['user'];
+
+$sql = "SELECT * FROM user_info WHERE user_id = '$user->user_id'";
 $result = $conn->query($sql);
 if ($result->num_rows == 1) {
     $row = $result->fetch_assoc();
     $_SESSION['user_info'] = (object) $row;
 }
 
-$userInfo = $_SESSION['user_info'];
+$user_info = $_SESSION['user_info'];
 
 ?>
 
@@ -78,10 +88,10 @@ $userInfo = $_SESSION['user_info'];
         <div class="h-100 d-flex flex-column align-items-center justify-content-center">
             <div class="mb-5">
                 <h1 class="text-light">
-                    Welcome, <?php echo $userInfo->fname; ?>!
+                    Welcome, <?php echo $user_info->fname; ?>!
                 </h1>
             </div>
-            <div class="row">
+            <div class="row w-100">
                 <div class="col-8">
                     <div class="row">
                         <div class="col-12">
@@ -97,7 +107,12 @@ $userInfo = $_SESSION['user_info'];
                         <div class="col-12">
                             <div class="dash-card w-100 p-4 overflow-auto">
                                 <?php 
-                                    $sql = "SELECT *, booking.id AS bookingid FROM booking JOIN user on booking.customer_id = user.id";
+                                    $sql = "SELECT *
+                                    FROM bookings
+                                    JOIN services ON bookings.service_id = services.service_id
+                                    JOIN deliveries ON bookings.booking_id = deliveries.booking_id
+                                    JOIN user_info ON bookings.user_id = user_info.user_id";
+
                                     $result = $conn->query($sql);
 
                                     if ($result->num_rows > 0) {
@@ -108,20 +123,21 @@ $userInfo = $_SESSION['user_info'];
                                                 <div>
                                                     <h5><span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span></h5>
                                                     <h5 class="card-title mb-1">
-                                                        Booking No: <strong><?php echo $row['bookingid']; ?></strong>
+                                                        <strong>Booking No:</strong> <?php echo $row['booking_id']; ?>
                                                     </h5>
-                                                    <h5 class="card-title mb-1">
-                                                    <strong>Customer: </strong><?php echo $row['fname'].' '.$row['lname'] ; ?>
-                                                    </h5>
-                                                    <h6 class="card-title mb-1">
-                                                    <strong>Address: </strong><?php echo $row['address']; ?>
-                                                    </h6>
-                                                    <h6 class="card-title mb-1">
-                                                    <strong>Notes: </strong><?php echo $row['notes']; ?>
-                                                    </h6>
-                                                    <p class="mb-0 text-secondary">
-                                                        Booked on: <?php echo $row['created_on']; ?>
+                                                    <p class="mb-0">
+                                                        <strong>Customer:</strong> <?php echo $row['fname'].' '.$row['lname']; ?>
                                                     </p>
+                                                    <p class="mb-0">
+                                                        <strong>Address:</strong> <?php echo $row['address']; ?>
+                                                    </p>
+                                                    <small class="mb-0 text-secondary">
+                                                        <strong>Created:</strong> <?php echo $row['created_on']; ?>
+                                                    </small>
+                                                    <br>
+                                                    <small class="mb-0 text-info">
+                                                        <strong class="text-secondary">Notes:</strong> <?php echo ($row['notes'] ? $row['notes'] : 'None'); ?>
+                                                    </small>
                                                 </div>
                                                 <div class="align-self-center text-right">
                                                     <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
@@ -129,14 +145,6 @@ $userInfo = $_SESSION['user_info'];
                                                         Php <?php echo $row['price']; ?>
                                                     </h5>
                                                 </div>
-                                            </div>
-                                            <div class="d-flex justify-content-end">
-                                                <button onclick="editBooking()" class="btn btn-sm btn-info mr-2">
-                                                    Edit
-                                                </button>
-                                                <a href="/awebdes_finals/deletebooking.php?id=<?php echo $row['bookingid']; ?>" class="btn btn-sm btn-danger">
-                                                    Delete
-                                                </a>
                                             </div>
                                         </div>
                                     <?php
@@ -205,16 +213,19 @@ $userInfo = $_SESSION['user_info'];
         <form method="POST" class="mb-0">
             <div class="modal-body p-4">
                 <div class="form-group">
-                    <label for="exampleFormControlSelect1">Customer</label>
                     <select class="form-control" name="user_id" id="">
                         <?php 
-                        $sql = "SELECT * FROM user WHERE role='customer'";
+
+                        $sql = "SELECT * FROM users
+                        JOIN user_info ON users.user_id = user_info.user_id
+                        WHERE users.role_id=4";
+
                         $result = $conn->query($sql);
 
                         if ($result->num_rows > 0) {
                             while($row = $result->fetch_assoc()) {
                         ?>
-                            <option value="<?php echo $row['id']; ?>"><?php echo $row['fname'].' '.$row['lname']; ?></option>
+                            <option value="<?php echo $row['user_id']; ?>"><?php echo $row['fname'].' '.$row['lname']; ?></option>
                         <?php
                             }
                         } else {
@@ -223,7 +234,6 @@ $userInfo = $_SESSION['user_info'];
                             <?php
                         }
                         ?>
-                        
                     </select>
                 </div>
                 <div class="form-group">
@@ -235,14 +245,12 @@ $userInfo = $_SESSION['user_info'];
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="iron" id="iron" value="iron">
-                        <label class="form-check-label" for="iron">Iron</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="fold" id="fold" value="fold">
-                        <label class="form-check-label" for="fold">Fold</label>
-                    </div>
+                    <label for="service_type">Service Type</label>
+                    <select class="form-control" name="service_type" id="service_type">
+                        <option value="1">Wash</option>
+                        <option value="2">Wash & Fold</option>
+                        <option value="3">Wash, Fold & Iron</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <div class="form-check form-check-inline">
@@ -261,8 +269,8 @@ $userInfo = $_SESSION['user_info'];
                 </div>
                 <hr>
                 <div class="form-group" id="other_address_form">
-                    <label for="exampleFormControlSelect1">Deliver to another address</label>
-                    <input type="text" class="form-control" name="other_address" id="other_address" placeholder="Enter new address">
+                    <label for="exampleFormControlSelect1">Address</label>
+                    <input type="text" class="form-control" name="address" id="address" placeholder="Enter address">
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Notes (Optional)</label>
@@ -281,131 +289,61 @@ $userInfo = $_SESSION['user_info'];
     </div>
 </div>
 
-<div class="modal-wrapper d-none" id="edit_modal">
-    <div class="booking-modal modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Create a Booking</h5>
-        </div>
-        <form method="POST" class="mb-0">
-            <div class="modal-body p-4">
-                <div class="form-group">
-                    <label for="exampleFormControlSelect1">Enter Weight (kg)</label>
-                    <div class="d-flex justify-content-center align-items-center">
-                        <button class="btn btn-primary" type="button" onclick="removeWeight()">-</button>
-                        <input class="weight-input mx-3" type="number" min="1" name="laundry_weight" id="laundry_weight">
-                        <button class="btn btn-primary" type="button" onclick="addWeight()">+</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="iron" id="iron" value="iron">
-                        <label class="form-check-label" for="iron">Iron</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="fold" id="fold" value="fold">
-                        <label class="form-check-label" for="fold">Fold</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="fulfillment" id="fulfillment1" value="delivery" checked>
-                        <label class="form-check-label" for="fulfillment1">For Delivery</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="fulfillment" id="fulfillment2" value="pickup">
-                        <label class="form-check-label" for="fulfillment2">For Pick-up</label>
-                    </div>
-                </div>
-                <hr>
-                <div class="form-group d-flex justify-content-between align-items-center">
-                    <span class="font-weight-bold">TOTAL</span>
-                    <span id="totalPrice" class="text-success font-weight-bold"></span>
-                </div>
-                <hr>
-                <div class="form-group" id="other_address_form">
-                    <label for="exampleFormControlSelect1">Deliver to another address</label>
-                    <input type="text" class="form-control" name="other_address" id="other_address" placeholder="Enter new address">
-                </div>
-                <div class="form-group">
-                    <label for="exampleFormControlSelect1">Notes (Optional)</label>
-                    <input type="text" class="form-control" name="notes" id="notes" placeholder="Special requests, comments, etc">
-                </div>
-                <div class="mt-4">
-                    <small><strong>Policy:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum tempora exercitationem, nemo nobis eaque accusantium.</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Close</button>
-                <button type="submit" name="submit" class="btn btn-primary">Confirm Booking</button>
-            </div>
-        </form>
-      </div>
-    </div>
-</div>
-
 <?php
 
 if(isset($_POST['submit'])) {
 
+    $selectedUserId = $_POST['laundry_weight'];
+    $laundryWeight = $_POST['laundry_weight'];
+    $service_id = $_POST['service_type'];
+    $address = $_POST['address'];
+    $notes = $_POST['notes'];
+
     $baseWashAmount = 70;
-    $baseIronPrice = 40;
-    $baseFoldPrice = 40;
+    $baseWashFoldAmount = 110;
+    $baseWashFoldIronAmount = 150;
     $baseDeliveryPrice = 40;
 
-    $iron = false;
-    $fold = false;
-
-    if(isset($_POST['iron'])) {
-        $iron = true;
-    }
-
-    if(isset($_POST['fold'])) {
-        $iron = true;
-    }
-
-    $fulfillment = $_POST['fulfillment'];
-    $laundryWeight = $_POST['laundry_weight'];
+    global $baseWashAmount, $baseWashFoldAmount, $baseWashFoldIronAmount, $baseDeliveryPrice;
 
     $weightMultiplier = ceil($laundryWeight / 7);
-    $washAmount = $baseWashAmount * $weightMultiplier;
-    $ironPrice = $baseIronPrice * $weightMultiplier;
-    $foldPrice = $baseFoldPrice * $weightMultiplier;
+    $washPrice = $baseWashAmount * $weightMultiplier;
+    $washFoldPrice = $baseWashFoldAmount * $weightMultiplier;
+    $washFoldIronPrice = $baseWashFoldIronAmount * $weightMultiplier;
     $deliveryPrice = $baseDeliveryPrice * $weightMultiplier;
 
     $additionalPrice = 0;
 
-    if ($iron) {
-        $additionalPrice += $ironPrice;
+    if ($_POST['service_type'] == 1) {
+        $additionalPrice += $washPrice;
     }
 
-    if ($fold) {
-        $additionalPrice += $foldPrice;
+    if ($_POST['service_type'] == 2) {
+        $additionalPrice += $washFoldPrice;
+    }
+
+    if ($_POST['service_type'] == 3) {
+        $additionalPrice += $washFoldIronPrice;
     }
 
     $fulfillmentPrice = 0;
 
-    if ($fulfillment === 'delivery') {
+    if ($_POST['fulfillment'] === 'delivery') {
         $fulfillmentPrice = $deliveryPrice;
     }
 
-    $totalAmount = $washAmount + $additionalPrice + $fulfillmentPrice;
+    $totalAmount = $additionalPrice + $fulfillmentPrice;
 
+    $createBooking = "INSERT INTO bookings (user_id, service_id, weight, address, notes, total_payment) VALUES ('$selectedUserId', '$service_id', '$laundryWeight', '$address', '$notes', '$totalAmount')";
 
-    $customer_id = $_POST['user_id'];
-    $weight = $_POST['laundry_weight'];
-    $price = $totalAmount;
-    $status = "new";
-    $otherAddress = $_POST['other_address'];
-    $notes = $_POST['notes'];
-    $fulfillment_type = $_POST['fulfillment'];
-
-    $sql = "INSERT INTO booking (customer_id, weight, price, status, other_address, notes, fulfillment_type) VALUES ('$customer_id', '$weight', '$price', '$status', '$otherAddress', '$notes', '$fulfillment_type')";
-
-    if ($conn->query($sql) === TRUE) {
-        header('Location: /awebdes_finals/dashboard-customer.php');
+    if ($conn->query($createBooking) === TRUE) {
+        $createDelivery = "INSERT INTO deliveries (booking_id, status) VALUES ('$conn->insert_id', 'pending')";
+            if ($conn->query($createDelivery) === TRUE) {
+                return true;
+            }
+        // echo 'Success!';
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $createBooking . "<br>" . $conn->error;
     }
 
     $conn->close();
@@ -415,10 +353,9 @@ if(isset($_POST['submit'])) {
 
 
 <script>
-
     let baseWashAmount = 70;
-    let baseIronPrice = 40;
-    let baseFoldPrice = 40;
+    let baseWashFoldAmount = 110;
+    let baseWashFoldIronAmount = 150;
     let baseDeliveryPrice = 40;
 
     let iron = false;
@@ -429,6 +366,7 @@ if(isset($_POST['submit'])) {
     let notes = '';
 
     const weightField = document.getElementById("laundry_weight");
+    const serviceField = document.getElementById("service_type");
     const totalPriceElement = document.getElementById("totalPrice");
 
     weightField.value = laundryWeight;
@@ -437,20 +375,26 @@ if(isset($_POST['submit'])) {
 
     function calculatePrices() {
         let weightMultiplier = Math.ceil(laundryWeight / 7);
-        let washAmount = baseWashAmount * weightMultiplier;
-        let ironPrice = baseIronPrice * weightMultiplier;
-        let foldPrice = baseFoldPrice * weightMultiplier;
+        let washPrice = baseWashAmount * weightMultiplier;
+        let washFoldPrice = baseWashFoldAmount * weightMultiplier;
+        let washFoldIronPrice = baseWashFoldIronAmount * weightMultiplier;
         let deliveryPrice = baseDeliveryPrice * weightMultiplier;
 
         let additionalPrice = 0;
 
-        if (iron) {
-            additionalPrice += ironPrice;
+        if(serviceField.value == 1) {
+            additionalPrice += washPrice;
         }
 
-        if (fold) {
-            additionalPrice += foldPrice;
+        if(serviceField.value == 2) {
+            additionalPrice += washFoldPrice;
         }
+
+        if(serviceField.value == 3) {
+            additionalPrice += washFoldIronPrice;
+        }
+
+        console.log(additionalPrice);
 
         let fulfillmentPrice = 0;
 
@@ -458,7 +402,7 @@ if(isset($_POST['submit'])) {
             fulfillmentPrice = deliveryPrice;
         }
 
-        let totalAmount = washAmount + additionalPrice + fulfillmentPrice;
+        let totalAmount = additionalPrice + fulfillmentPrice;
 
         totalPriceElement.innerText = "Php " + totalAmount.toString();
     }
@@ -476,6 +420,10 @@ if(isset($_POST['submit'])) {
             calculatePrices();
         }
     }
+
+    document.getElementById("service_type").addEventListener("change", function () {
+        calculatePrices();
+    });
 
     document.getElementById("fulfillment1").addEventListener("change", function () {
         fulfillment = 'delivery';
@@ -510,16 +458,8 @@ if(isset($_POST['submit'])) {
         $("#booking_modal").removeClass("d-none");
     }
 
-    function editBooking() {
-        $("#edit_modal").removeClass("d-none");
-    }
-
     function closeBookingModal() {
         $("#booking_modal").addClass("d-none");
-    }
-
-    function closeEditModal() {
-        $("#edit_modal").addClass("d-none");
     }
 
     $(document).on("click", "#dashbtn_1", function() {
