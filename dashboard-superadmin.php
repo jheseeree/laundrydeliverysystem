@@ -2,7 +2,7 @@
 session_start();
 
 if(!isset($_SESSION['loggedin'])) {
-    header('Location: /awebdes_finals/login.php');
+    header('Location: login.php');
     exit;
 }
 
@@ -19,7 +19,6 @@ if ($conn->connect_error) {
 
 $username = $_SESSION['username'];
 
-// $sql = "SELECT * FROM users WHERE username = '$username' INNER JOIN bookings ON users.user_id=bookings.user_id";
 $sql = "SELECT * FROM users WHERE username = '$username'";
 $result = $conn->query($sql);
 if ($result->num_rows == 1) {
@@ -38,9 +37,11 @@ if ($result->num_rows == 1) {
 
 $user_info = $_SESSION['user_info'];
 
-if($user->role_id !== 1) {
+
+if($user->role_id != 1) {
     header('Location: 404.php');
 }
+
 
 ?>
 

@@ -41,7 +41,6 @@ $user_info = $_SESSION['user_info'];
 if($user->role_id != 5) {
     header('Location: 404.php');
 }
-
 ?>
 
 <!DOCTYPE html>
