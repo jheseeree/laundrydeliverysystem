@@ -44,7 +44,7 @@ function sendEmail() {
                 'HTMLPart' => '
                     <h3>Dear '.$fname.',</h3>
                     <h3>Successfully created your account!</h3>
-                    <h3><a href="http://localhost/awebdes_finals/login.php">Click here</a> to login</h3>'
+                    <h3><a href="http://localhost/laundrydeliverysystem/login.php">Click here</a> to login</h3>'
             )
         )
     );

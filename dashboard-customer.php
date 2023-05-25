@@ -166,32 +166,29 @@ $user_info = $_SESSION['user_info'];
                             Price List
                         </h5>
                         <hr>
-                        <div class="d-flex justify-content-between p-3">
-                            <span class="font-weight-bold">
-                                Wash & Fold
-                            </span>
-                            <span>
-                                Php 120/kg
-                            </span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between p-3">
-                            <span class="font-weight-bold">
-                                Wash & Fold
-                            </span>
-                            <span>
-                                Php 120/kg
-                            </span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between p-3">
-                            <span class="font-weight-bold">
-                                Wash & Fold
-                            </span>
-                            <span>
-                                Php 120/kg
-                            </span>
-                        </div>
+                        <?php
+                        $sql = "SELECT name, price FROM services";
+                        $result = $conn->query($sql);
+
+                        if ($result->num_rows > 0) {
+                        // output data of each row
+                        while($row = $result->fetch_assoc()) {
+                            echo '<div class="d-flex justify-content-between p-3">';
+                            echo '<span class="font-weight-bold">';
+                            echo $row["name"];
+                            echo '</span>';
+
+                            echo '<span class="font-weight-bold text-secondary">';
+                            echo 'Php ' . $row["price"] . '/kg';
+                            echo '</span>';
+                            echo '</div>';
+                            echo '<hr>';
+                        }
+                        } else {
+                        echo "0 results";
+                        }
+                        $conn->close();
+                        ?>
                     </div>
                 </div>
             </div>
