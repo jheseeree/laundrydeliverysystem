@@ -110,8 +110,8 @@ if($user->role_id != 5) {
                                     $sql = "SELECT *
                                     FROM bookings
                                     JOIN services ON bookings.service_id = services.service_id
-                                    JOIN deliveries ON bookings.booking_id = deliveries.booking_id
-                                    WHERE deliveries.status = 'pending'";
+                                    JOIN fulfillment ON bookings.booking_id = fulfillment.booking_id
+                                    WHERE fulfillment.status = 'pending'";
 
                                     $result = $conn->query($sql);
 

@@ -115,7 +115,7 @@ if($user->role_id != 1) {
                                     $sql = "SELECT *
                                     FROM bookings
                                     JOIN services ON bookings.service_id = services.service_id
-                                    JOIN deliveries ON bookings.booking_id = deliveries.booking_id
+                                    JOIN fulfillment ON bookings.booking_id = fulfillment.booking_id
                                     JOIN user_info ON bookings.user_id = user_info.user_id";
 
                                     $result = $conn->query($sql);
@@ -386,7 +386,7 @@ if(isset($_POST['submit'])) {
     $createBooking = "INSERT INTO bookings (user_id, service_id, weight, address, notes, total_payment) VALUES ('$selectedUserId', '$service_id', '$laundryWeight', '$address', '$notes', '$totalAmount')";
 
     if ($conn->query($createBooking) === TRUE) {
-        $createDelivery = "INSERT INTO deliveries (booking_id, status) VALUES ('$conn->insert_id', 'pending')";
+        $createDelivery = "INSERT INTO fulfillment (booking_id, status) VALUES ('$conn->insert_id', 'pending')";
             if ($conn->query($createDelivery) === TRUE) {
                 return true;
             }
