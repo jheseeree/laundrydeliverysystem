@@ -118,8 +118,8 @@ $user_info = $_SESSION['user_info'];
                                     if ($result->num_rows > 0) {
                                         while($row = $result->fetch_assoc()) {
                                     ?>
-                                        <div class="card shadow-sm p-3 mb-3">
-                                            <div class="d-flex justify-content-between">
+                                        <div class="card shadow-sm mb-3">
+                                            <div class="card-body d-flex justify-content-between">
                                                 <div>
                                                     <h5><span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span></h5>
                                                     <h5 class="card-title mb-1">
@@ -140,11 +140,16 @@ $user_info = $_SESSION['user_info'];
                                                     </small>
                                                 </div>
                                                 <div class="align-self-center text-right">
-                                                    <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
-                                                    <h5 class="text-success font-weight-bold mb-0">
+                                                    <h4 class="text-success font-weight-bold mb-0">
                                                         Php <?php echo $row['price']; ?>
-                                                    </h5>
+                                                    </h4>
+                                                    <small class="text-secondary"><?php echo $row['name']; ?></small>
+                                                    <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
                                                 </div>
+                                            </div>
+                                            <div class="card-footer d-flex justify-content-end">
+                                                <button class="btn btn-secondary btn-sm mr-2">Edit</button>
+                                                <a href="deletebooking.php?id=<?php echo $row['booking_id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                             </div>
                                         </div>
                                     <?php
@@ -293,7 +298,7 @@ $user_info = $_SESSION['user_info'];
 
 if(isset($_POST['submit'])) {
 
-    $selectedUserId = $_POST['laundry_weight'];
+    $selectedUserId = $_POST['user_id'];
     $laundryWeight = $_POST['laundry_weight'];
     $service_id = $_POST['service_type'];
     $address = $_POST['address'];

@@ -2,7 +2,7 @@
 session_start();
 
 if(!isset($_SESSION['loggedin'])) {
-    header('Location: /awebdes_finals/login.php');
+    header('Location: login.php');
     exit;
 }
 
