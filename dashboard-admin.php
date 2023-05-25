@@ -153,7 +153,7 @@ if($user->role_id !== (2||3)) {
                                             </div>
                                             <div class="card-footer d-flex justify-content-end">
                                                 <button class="btn btn-secondary btn-sm mr-2">Edit</button>
-                                                <a href="deletebooking.php?id=<?php echo $row['booking_id']; ?>" class="btn btn-danger btn-sm">Delete</a>
+                                                <a href="deletebookingadmin.php?id=<?php echo $row['booking_id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                             </div>
                                         </div>
                                     <?php

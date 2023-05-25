@@ -1,5 +1,5 @@
 <?php
-session_start(); 
+session_start();
 
 if(!isset($_SESSION['loggedin'])) {
     header('Location: login.php');
@@ -17,42 +17,29 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
-
 $username = $_SESSION['username'];
 
 $sql = "SELECT * FROM users WHERE username = '$username'";
 $result = $conn->query($sql);
 if ($result->num_rows == 1) {
     $row = $result->fetch_assoc();
+    $_SESSION['user'] = (object) $row;
+}
+
+$user = $_SESSION['user'];
+
+$sql = "SELECT * FROM user_info WHERE user_id = '$user->user_id'";
+$result = $conn->query($sql);
+if ($result->num_rows == 1) {
+    $row = $result->fetch_assoc();
     $_SESSION['user_info'] = (object) $row;
 }
 
-$userInfo = $_SESSION['user_info'];
+$user_info = $_SESSION['user_info'];
 
-if($user->role_id !== 5) {
+
+if($user->role_id != 5) {
     header('Location: 404.php');
-}
-
-
-if(isset($_POST['book'])) {
-    $customer_id = $userInfo->id;
-    $weight = 3.5;
-    $price = 120.00;
-    $delivery_time = "2023-05-23 10:00:00";
-    $status = "new";
-    $fulfillment_type = "Delivery";
-    $timestamp = date("Y-m-d H:i:s");
-
-    $sql = "INSERT INTO booking (customer_id, weight, price, delivery_time, status, fulfillment_type, timestamp) VALUES ('$customer_id', '$weight', '$price', '$delivery_time', '$status', '$fulfillment_type', '$timestamp')";
-
-    if ($conn->query($sql) === TRUE) {
-        echo "New record created successfully";
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
-    }
-
-    $conn->close();
 }
 
 ?>
@@ -121,7 +108,12 @@ if(isset($_POST['book'])) {
                             <div class="col-12" id="active_list">
                                 <div class="dash-card w-100 p-4 overflow-auto">
                                 <?php 
-                                    $sql = "SELECT * FROM booking INNER JOIN user ON booking.customer_id = user.id";
+                                    $sql = "SELECT *
+                                    FROM bookings
+                                    JOIN services ON bookings.service_id = services.service_id
+                                    JOIN deliveries ON bookings.booking_id = deliveries.booking_id
+                                    WHERE deliveries.status = 'pending'";
+
                                     $result = $conn->query($sql);
 
                                     if ($result->num_rows > 0) {
@@ -130,26 +122,26 @@ if(isset($_POST['book'])) {
                                         <div class="card shadow-sm p-3 mb-3">
                                             <div class="d-flex justify-content-between">
                                                 <div>
-                                                    <h5>
-                                                        <span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span>
-                                                    </h5>
+                                                    <h5><span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span></h5>
                                                     <h5 class="card-title mb-1">
-                                                        Booking No: <strong><?php echo $row['id']; ?></strong>
+                                                        <strong>Booking No:</strong> <?php echo $row['booking_id']; ?>
                                                     </h5>
-                                                    <p class="mb-0 text-secondary">
-                                                        <?php echo $row['created_on']; ?>
+                                                    <p class="mb-0">
+                                                        <strong>Address:</strong> <?php echo $row['address']; ?>
                                                     </p>
-                                                    <p class="mb-0 text-secondary">
-                                                        Customer: <?php echo $row['fname']; ?> <?php echo $row['lname']; ?>
-                                                    </p>
-                                                    <p class="mb-0 text-secondary">
-                                                        Address: <?php echo $row['address']; ?>
-                                                    </p>
+                                                    <small class="mb-0 text-secondary">
+                                                        <strong>Created:</strong> <?php echo $row['created_on']; ?>
+                                                    </small>
+                                                    <br>
+                                                    <small class="mb-0 text-info">
+                                                        <strong class="text-secondary">Notes:</strong> <?php echo ($row['notes'] ? $row['notes'] : 'None'); ?>
+                                                    </small>
                                                 </div>
-                                                <div class="align-self-end text-right">
-                                                    <button class="btn btn-create text-light px-3 mt-4 mb-1" id="create_booking">
-                                                        Booking Details
-                                                    </button>
+                                                <div class="align-self-center text-right">
+                                                    <h5 class="text-success font-weight-bold mb-0">
+                                                        Php <?php echo $row['price']; ?>
+                                                    </h5>
+                                                    <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
                                                 </div>
                                             </div>
                                         </div>

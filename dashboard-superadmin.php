@@ -101,15 +101,15 @@ if($user->role_id !== 1) {
                         <div class="col-12">
                             <div class="d-flex align-items-center">
                                 <a id="dashbtn_1" class="btn btn-dash active-dash-btn font-weight-bold px-4 py-2 mr-2">
-                                    Active
+                                    Bookings
                                 </a>
                                 <a id="dashbtn_2" class="btn btn-dash font-weight-bold px-4 py-2">
-                                    Completed
+                                    Users
                                 </a>
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="dash-card w-100 p-4 overflow-auto">
+                            <div id="bookings_list" class="dash-card w-100 p-4 overflow-auto">
                                 <?php 
                                     $sql = "SELECT *
                                     FROM bookings
@@ -154,6 +154,45 @@ if($user->role_id !== 1) {
                                             <div class="card-footer d-flex justify-content-end">
                                                 <button class="btn btn-secondary btn-sm mr-2">Edit</button>
                                                 <a href="deletebooking.php?id=<?php echo $row['booking_id']; ?>" class="btn btn-danger btn-sm">Delete</a>
+                                            </div>
+                                        </div>
+                                    <?php
+                                        }
+                                    } else {
+                                        echo "0 results";
+                                    }
+                                ?>
+                            </div>
+                            <div id="users_list" class="dash-card w-100 p-4 overflow-auto d-none">
+                                <?php 
+                                    $sql = "SELECT * FROM users 
+                                    JOIN roles ON users.role_id=roles.role_id
+                                    JOIN user_info ON users.user_id=user_info.user_id
+                                    WHERE NOT users.role_id=1";
+
+                                    $result = $conn->query($sql);
+
+                                    if ($result->num_rows > 0) {
+                                        while($row = $result->fetch_assoc()) {
+                                    ?>
+                                        <div class="card shadow-sm mb-3">
+                                            <div class="card-body d-flex justify-content-between">
+                                                <div>
+                                                    <h5><span class="badge badge-primary text-capitalize"><?php echo $row['permission_level']; ?></span></h5>
+                                                    <p class="mb-1">
+                                                        <strong>ID No:</strong> <?php echo $row['user_id']; ?>
+                                                    </p>
+                                                    <h5 class="card-title mb-1">
+                                                        <strong>Name:</strong> <?php echo $row['fname'].' '.$row['lname']; ?>
+                                                    </h5>
+                                                    <p class="mb-0">
+                                                        <strong>Email:</strong> <?php echo $row['email']; ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer d-flex justify-content-end">
+                                                <button class="btn btn-secondary btn-sm mr-2">Edit</button>
+                                                <a href="deleteuser.php?id=<?php echo $row['user_id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                             </div>
                                         </div>
                                     <?php
@@ -453,12 +492,18 @@ if(isset($_POST['submit'])) {
                 $("#dashbtn_2").removeClass("active-dash-btn");
                 $("#dashbtn_3").removeClass("active-dash-btn");
                 $("#dashbtn_4").removeClass("active-dash-btn");
+
+                $("#bookings_list").removeClass("d-none");
+                $("#users_list").addClass("d-none");
                 break;
             case 2:
                 $("#dashbtn_1").removeClass("active-dash-btn");
                 $("#dashbtn_2").addClass("active-dash-btn");
                 $("#dashbtn_3").removeClass("active-dash-btn");
                 $("#dashbtn_4").removeClass("active-dash-btn");
+
+                $("#bookings_list").addClass("d-none");
+                $("#users_list").removeClass("d-none");
                 break;
         }
     }
