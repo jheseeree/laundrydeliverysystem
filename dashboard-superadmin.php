@@ -2,7 +2,7 @@
 session_start();
 
 if(!isset($_SESSION['loggedin'])) {
-    header('Location: login.php');
+    header('Location: /awebdes_finals/login.php');
     exit;
 }
 
@@ -19,6 +19,7 @@ if ($conn->connect_error) {
 
 $username = $_SESSION['username'];
 
+// $sql = "SELECT * FROM users WHERE username = '$username' INNER JOIN bookings ON users.user_id=bookings.user_id";
 $sql = "SELECT * FROM users WHERE username = '$username'";
 $result = $conn->query($sql);
 if ($result->num_rows == 1) {
@@ -36,10 +37,6 @@ if ($result->num_rows == 1) {
 }
 
 $user_info = $_SESSION['user_info'];
-
-if($user_info->role_id !== 4) {
-    header('Location: 404.php');
-}
 
 ?>
 
@@ -114,20 +111,23 @@ if($user_info->role_id !== 4) {
                                     FROM bookings
                                     JOIN services ON bookings.service_id = services.service_id
                                     JOIN deliveries ON bookings.booking_id = deliveries.booking_id
-                                    WHERE bookings.user_id = $user->user_id";
+                                    JOIN user_info ON bookings.user_id = user_info.user_id";
 
                                     $result = $conn->query($sql);
 
                                     if ($result->num_rows > 0) {
                                         while($row = $result->fetch_assoc()) {
                                     ?>
-                                        <div class="card shadow-sm p-3 mb-3">
-                                            <div class="d-flex justify-content-between">
+                                        <div class="card shadow-sm mb-3">
+                                            <div class="card-body d-flex justify-content-between">
                                                 <div>
                                                     <h5><span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span></h5>
                                                     <h5 class="card-title mb-1">
                                                         <strong>Booking No:</strong> <?php echo $row['booking_id']; ?>
                                                     </h5>
+                                                    <p class="mb-0">
+                                                        <strong>Customer:</strong> <?php echo $row['fname'].' '.$row['lname']; ?>
+                                                    </p>
                                                     <p class="mb-0">
                                                         <strong>Address:</strong> <?php echo $row['address']; ?>
                                                     </p>
@@ -140,11 +140,16 @@ if($user_info->role_id !== 4) {
                                                     </small>
                                                 </div>
                                                 <div class="align-self-center text-right">
-                                                    <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
-                                                    <h5 class="text-success font-weight-bold mb-0">
+                                                    <h4 class="text-success font-weight-bold mb-0">
                                                         Php <?php echo $row['price']; ?>
-                                                    </h5>
+                                                    </h4>
+                                                    <small class="text-secondary"><?php echo $row['name']; ?></small>
+                                                    <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
                                                 </div>
+                                            </div>
+                                            <div class="card-footer d-flex justify-content-end">
+                                                <button class="btn btn-secondary btn-sm mr-2">Edit</button>
+                                                <a href="deletebooking.php?id=<?php echo $row['booking_id']; ?>" class="btn btn-danger btn-sm">Delete</a>
                                             </div>
                                         </div>
                                     <?php
@@ -169,29 +174,32 @@ if($user_info->role_id !== 4) {
                             Price List
                         </h5>
                         <hr>
-                        <?php
-                        $sql = "SELECT name, price FROM services";
-                        $result = $conn->query($sql);
-
-                        if ($result->num_rows > 0) {
-                        // output data of each row
-                        while($row = $result->fetch_assoc()) {
-                            echo '<div class="d-flex justify-content-between p-3">';
-                            echo '<span class="font-weight-bold">';
-                            echo $row["name"];
-                            echo '</span>';
-
-                            echo '<span class="font-weight-bold text-secondary">';
-                            echo 'Php ' . $row["price"] . '/kg';
-                            echo '</span>';
-                            echo '</div>';
-                            echo '<hr>';
-                        }
-                        } else {
-                        echo "0 results";
-                        }
-                        $conn->close();
-                        ?>
+                        <div class="d-flex justify-content-between p-3">
+                            <span class="font-weight-bold">
+                                Wash & Fold
+                            </span>
+                            <span>
+                                Php 120/kg
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between p-3">
+                            <span class="font-weight-bold">
+                                Wash & Fold
+                            </span>
+                            <span>
+                                Php 120/kg
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between p-3">
+                            <span class="font-weight-bold">
+                                Wash & Fold
+                            </span>
+                            <span>
+                                Php 120/kg
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -209,6 +217,30 @@ if($user_info->role_id !== 4) {
         </div>
         <form method="POST" class="mb-0">
             <div class="modal-body p-4">
+                <div class="form-group">
+                    <select class="form-control" name="user_id" id="">
+                        <?php 
+
+                        $sql = "SELECT * FROM users
+                        JOIN user_info ON users.user_id = user_info.user_id
+                        WHERE users.role_id=4";
+
+                        $result = $conn->query($sql);
+
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                        ?>
+                            <option value="<?php echo $row['user_id']; ?>"><?php echo $row['fname'].' '.$row['lname']; ?></option>
+                        <?php
+                            }
+                        } else {
+                            ?>
+                            <option value="" disabled>No customers</option>
+                            <?php
+                        }
+                        ?>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Enter Weight (kg)</label>
                     <div class="d-flex justify-content-center align-items-center">
@@ -266,6 +298,7 @@ if($user_info->role_id !== 4) {
 
 if(isset($_POST['submit'])) {
 
+    $selectedUserId = $_POST['user_id'];
     $laundryWeight = $_POST['laundry_weight'];
     $service_id = $_POST['service_type'];
     $address = $_POST['address'];
@@ -306,7 +339,7 @@ if(isset($_POST['submit'])) {
 
     $totalAmount = $additionalPrice + $fulfillmentPrice;
 
-    $createBooking = "INSERT INTO bookings (user_id, service_id, weight, address, notes, total_payment) VALUES ('$user->user_id', '$service_id', '$laundryWeight', '$address', '$notes', '$totalAmount')";
+    $createBooking = "INSERT INTO bookings (user_id, service_id, weight, address, notes, total_payment) VALUES ('$selectedUserId', '$service_id', '$laundryWeight', '$address', '$notes', '$totalAmount')";
 
     if ($conn->query($createBooking) === TRUE) {
         $createDelivery = "INSERT INTO deliveries (booking_id, status) VALUES ('$conn->insert_id', 'pending')";

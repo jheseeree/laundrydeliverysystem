@@ -37,6 +37,9 @@
                     $sql2 = "SELECT * FROM users WHERE username = '$username'";
                     $result2 = $conn->query($sql);
                     if ($result2->num_rows == 1) {
+                        if($row['role_id'] == 1) {
+                            header('Location: dashboard-superadmin.php');
+                        }
                         if($row['role_id'] == 4) {
                             header('Location: dashboard-customer.php');
                         }
