@@ -38,7 +38,7 @@ if ($result->num_rows == 1) {
 
 $user_info = $_SESSION['user_info'];
 
-if($user->role_id !== 4) {
+if($user->role_id !== 1) {
     header('Location: 404.php');
 }
 

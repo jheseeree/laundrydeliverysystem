@@ -2,14 +2,14 @@
 session_start(); 
 
 if(!isset($_SESSION['loggedin'])) {
-    header('Location: /awebdes_finals/login.php');
+    header('Location: login.php');
     exit;
 }
 
 $db_servername = "localhost";
 $db_username = "root";
 $db_password = "";
-$db_name = "laundry_delivery";
+$db_name = "db_laundry_delivery";
 
 $conn = new mysqli($db_servername, $db_username, $db_password, $db_name);
 
@@ -21,7 +21,7 @@ if ($conn->connect_error) {
 
 $username = $_SESSION['username'];
 
-$sql = "SELECT * FROM user WHERE username = '$username'";
+$sql = "SELECT * FROM users WHERE username = '$username'";
 $result = $conn->query($sql);
 if ($result->num_rows == 1) {
     $row = $result->fetch_assoc();
