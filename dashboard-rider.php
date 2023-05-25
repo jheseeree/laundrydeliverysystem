@@ -1,5 +1,5 @@
 <?php
-session_start();
+session_start(); 
 
 if(!isset($_SESSION['loggedin'])) {
     header('Location: /awebdes_finals/login.php');
@@ -17,6 +17,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+
+
 $username = $_SESSION['username'];
 
 $sql = "SELECT * FROM user WHERE username = '$username'";
@@ -27,6 +29,10 @@ if ($result->num_rows == 1) {
 }
 
 $userInfo = $_SESSION['user_info'];
+
+if($user->role_id !== 5) {
+    header('Location: 404.php');
+}
 
 
 if(isset($_POST['book'])) {
